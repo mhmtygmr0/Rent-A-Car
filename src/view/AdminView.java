@@ -1,10 +1,13 @@
 package view;
 
 import business.BrandManager;
+import business.CarManager;
 import business.ModelManager;
 import core.ComboItem;
 import core.Helper;
+import dao.CarDao;
 import entity.Brand;
+import entity.Car;
 import entity.Model;
 import entity.User;
 
@@ -36,18 +39,25 @@ public class AdminView extends Layout {
     private JLabel fld_model_fuel;
     private JLabel fld_model_type;
     private JButton btn_cncl_model;
+    private JPanel pnl_car;
+    private JScrollPane scl_car;
+    private JTable tbl_car;
     private User user;
     private DefaultTableModel tmdl_brand = new DefaultTableModel();
     private DefaultTableModel tmdl_model = new DefaultTableModel();
+    private DefaultTableModel tmdl_car = new DefaultTableModel();
     private BrandManager brandManager;
     private ModelManager modelManager;
+    private CarManager carManager;
     private JPopupMenu brand_menu;
     private JPopupMenu model_menu;
+    private JPopupMenu car_menu;
     private Object[] col_model;
 
     public AdminView(User user) {
         this.brandManager = new BrandManager();
         this.modelManager = new ModelManager();
+        this.carManager = new CarManager();
         this.add(container);
         this.guiInitilize(600, 400);
         this.user = user;
@@ -63,8 +73,10 @@ public class AdminView extends Layout {
 
         this.loadModelTable(null);
         this.loadModelComponent();
-
         this.loadModelFilter();
+
+        this.loadCarTable();
+        this.loadCarComponent();
 
     }
 
@@ -129,7 +141,7 @@ public class AdminView extends Layout {
         this.btn_model_search.addActionListener(e -> {
             ComboItem selectedBrand = (ComboItem) this.cmb_s_model_brand.getSelectedItem();
             int brandId = 0;
-            if(selectedBrand != null){
+            if (selectedBrand != null) {
                 brandId = selectedBrand.getKey();
             }
             ArrayList<Model> modelListBySearch = this.modelManager.searchForTable(
@@ -197,6 +209,53 @@ public class AdminView extends Layout {
         });
 
         this.tbl_brand.setComponentPopupMenu(brand_menu);
+    }
+
+    private void loadCarComponent() {
+        tableRowSelect(this.tbl_car);
+        this.car_menu = new JPopupMenu();
+
+        this.car_menu.add("Yeni").addActionListener(e -> {
+            CarView carView = new CarView(new Car());
+            carView.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    loadCarTable();
+                }
+            });
+        });
+
+        this.car_menu.add("Güncelle").addActionListener(e -> {
+            int selectModelId = this.getTableSelectedRow(tbl_car, 0);
+            CarView carView = new CarView(this.carManager.getById(selectModelId));
+            carView.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    loadCarTable();
+                }
+            });
+        });
+
+        this.car_menu.add("Sil").addActionListener(e -> {
+            if (Helper.confirm("sure")) {
+                int selectCarId = this.getTableSelectedRow(tbl_car, 0);
+                if (this.carManager.delete(selectCarId)) {
+                    Helper.showMsg("done");
+                    loadCarTable();
+                } else {
+                    Helper.showMsg("error");
+                }
+            }
+        });
+
+        this.tbl_car.setComponentPopupMenu(car_menu);
+
+    }
+
+    public void loadCarTable() {
+        Object[] col_car = {"ID", "Marka", "Model", "Plaka", "Renk", "KM", "Yıl", "Tip", "Yakıt Türü", "Vites"};
+        ArrayList<Object[]> carList = this.carManager.getForTable(col_car.length, this.carManager.findAll());
+        this.createTable(this.tmdl_car, this.tbl_car, col_car, carList);
     }
 
     public void loadModelTable(ArrayList<Object[]> modelList) {
