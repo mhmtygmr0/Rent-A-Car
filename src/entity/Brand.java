@@ -12,6 +12,10 @@ public class Brand {
         this.name = name;
     }
 
+    public Brand(String name) {
+        this.name = name;
+    }
+
     public int getId() {
         return id;
     }
