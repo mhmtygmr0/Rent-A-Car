@@ -31,7 +31,7 @@ public class BrandView extends Layout {
                 Helper.showMsg("fill");
             } else {
 
-                boolean result;
+                boolean result = false;
                 if (this.brand == null) {
                     Brand obj = new Brand(this.fld_brand_name.getText());
                     result = this.brandManager.save(obj);
