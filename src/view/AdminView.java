@@ -13,6 +13,8 @@ import entity.User;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.MaskFormatter;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.ParseException;
@@ -85,6 +87,9 @@ public class AdminView extends Layout {
 
         this.lbl_welcome.setText("Hoşgeldin  " + this.user.getUsername());
 
+        //General Code
+        this.loadComponenet();
+
         //Brand Tab Menu
         this.loadBrandTable();
         this.loadBrandComponent();
@@ -103,7 +108,16 @@ public class AdminView extends Layout {
         this.loadBookingComponent();
         this.loadBookingFilter();
 
+    }
 
+    private void loadComponenet(){
+        this.btn_logout.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                LoginView loginView = new LoginView();
+            }
+        });
     }
 
 
