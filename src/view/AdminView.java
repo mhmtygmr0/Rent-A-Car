@@ -1,5 +1,6 @@
 package view;
 
+import business.BookManager;
 import business.BrandManager;
 import business.CarManager;
 import business.ModelManager;
@@ -56,27 +57,39 @@ public class AdminView extends Layout {
     private JTable tbl_booking;
     private JPanel pnl_booking_search;
     private JButton btn_cncl_booking;
+    private JTable tbl_rentals;
+    private JPanel pnl_rentals;
+    private JScrollPane scrl_rentals;
+    private JPanel pnl_rentals_search;
+    private JComboBox cmb_rentals_car_plate;
+    private JButton btn_rentals_search;
+    private JButton btn_cncl_rentals;
     private User user;
     private DefaultTableModel tmdl_brand = new DefaultTableModel();
     private DefaultTableModel tmdl_model = new DefaultTableModel();
     private DefaultTableModel tmdl_car = new DefaultTableModel();
     private DefaultTableModel tmdl_booking = new DefaultTableModel();
+    private DefaultTableModel tmdl_rentals = new DefaultTableModel();
     private BrandManager brandManager;
     private ModelManager modelManager;
     private CarManager carManager;
+    private BookManager bookManager;
     private JPopupMenu brand_menu;
     private JPopupMenu model_menu;
     private JPopupMenu car_menu;
     private JPopupMenu booking_menu;
+    private JPopupMenu rentals_menu;
     private Object[] col_model;
     private Object[] col_car;
     private Object[] col_brand;
     private Object[] col_booking_list;
+    private Object[] col_rentals_list;
 
     public AdminView(User user) {
         this.brandManager = new BrandManager();
         this.modelManager = new ModelManager();
         this.carManager = new CarManager();
+        this.bookManager = new BookManager();
         this.add(container);
         this.guiInitilize(900, 600);
         this.user = user;
@@ -108,9 +121,14 @@ public class AdminView extends Layout {
         this.loadBookingComponent();
         this.loadBookingFilter();
 
+        // Renrals Tab Menu
+        this.loadRentalsTable(null);
+        //this.loadRentalsComponent();
+        //this.loadRentalsFilter();
+
     }
 
-    private void loadComponenet(){
+    private void loadComponenet() {
         this.btn_logout.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -337,6 +355,10 @@ public class AdminView extends Layout {
         this.tbl_brand.setComponentPopupMenu(brand_menu);
     }
 
+    public void loadRentalsTable(ArrayList<Object[]> rentalsList) {
+        this.col_rentals_list = new Object[]{"ID", "Plaka", "Marka", "Model", "Müşteri", "Telefon", "Mail", "T.C", "Başlangıç Tarihi", "Bitiş Tarihi", "Fiyat"};
+        createTable(this.tmdl_rentals, this.tbl_rentals, this.col_rentals_list, rentalsList);
+    }
 
     public void loadBookingTable(ArrayList<Object[]> carList) {
         this.col_booking_list = new Object[]{"ID", "Marka", "Model", "Plaka", "Renk", "KM", "Yıl", "Tip", "Yakıt Türü", "Vites"};

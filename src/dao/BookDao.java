@@ -17,7 +17,26 @@ public class BookDao {
     }
 
     public ArrayList<Book> findAll() {
-        return this.selectByQuery("SELECT * FROM public.book ORDER BY book_id ASC");
+        return this.selectByQuery("SELECT \n" +
+                "    book.book_id,\n" +
+                "    car.car_plate,\n" +
+                "    brand.brand_name,\n" +
+                "    model.model_name,\n" +
+                "    book.book_name,\n" +
+                "    book.book_mpno,\n" +
+                "    book.book_mail,\n" +
+                "    book.book_idno,\n" +
+                "    book.book_strt_date,\n" +
+                "    book.book_fnsh_date,\n" +
+                "    book.book_prc\n" +
+                "FROM \n" +
+                "    book\n" +
+                "INNER JOIN \n" +
+                "    car ON book.book_car_id = car.car_id\n" +
+                "INNER JOIN \n" +
+                "    model ON car.car_model_id = model.model_id\n" +
+                "INNER JOIN \n" +
+                "    brand ON model.model_brand_id = brand.brand_id;");
     }
 
     public ArrayList<Book> selectByQuery(String query) {
