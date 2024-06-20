@@ -51,7 +51,7 @@ public class BookDao {
                 " VALUES (?,?,?,?,?,?,?,?,?,?)";
 
         try {
-            PreparedStatement pr = connect.prepareStatement(query);
+            PreparedStatement pr = this.connect.prepareStatement(query);
             pr.setInt(1, book.getCar_id());
             pr.setString(2, book.getName());
             pr.setString(3, book.getIdno());
