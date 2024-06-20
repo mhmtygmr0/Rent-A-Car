@@ -6,10 +6,7 @@ import business.CarManager;
 import business.ModelManager;
 import core.ComboItem;
 import core.Helper;
-import entity.Brand;
-import entity.Car;
-import entity.Model;
-import entity.User;
+import entity.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -57,19 +54,19 @@ public class AdminView extends Layout {
     private JTable tbl_booking;
     private JPanel pnl_booking_search;
     private JButton btn_cncl_booking;
-    private JTable tbl_rentals;
-    private JPanel pnl_rentals;
-    private JScrollPane scrl_rentals;
-    private JPanel pnl_rentals_search;
-    private JComboBox cmb_rentals_car_plate;
-    private JButton btn_rentals_search;
-    private JButton btn_cncl_rentals;
+    private JTable tbl_book;
+    private JPanel pnl_book;
+    private JScrollPane scrl_book;
+    private JPanel pnl_book_search;
+    private JComboBox cmb_book_car_plate;
+    private JButton btn_book_search;
+    private JButton btn_cncl_book;
     private User user;
     private DefaultTableModel tmdl_brand = new DefaultTableModel();
     private DefaultTableModel tmdl_model = new DefaultTableModel();
     private DefaultTableModel tmdl_car = new DefaultTableModel();
     private DefaultTableModel tmdl_booking = new DefaultTableModel();
-    private DefaultTableModel tmdl_rentals = new DefaultTableModel();
+    private DefaultTableModel tmdl_book = new DefaultTableModel();
     private BrandManager brandManager;
     private ModelManager modelManager;
     private CarManager carManager;
@@ -78,12 +75,12 @@ public class AdminView extends Layout {
     private JPopupMenu model_menu;
     private JPopupMenu car_menu;
     private JPopupMenu booking_menu;
-    private JPopupMenu rentals_menu;
+    private JPopupMenu book_menu;
     private Object[] col_model;
     private Object[] col_car;
     private Object[] col_brand;
     private Object[] col_booking_list;
-    private Object[] col_rentals_list;
+    private Object[] col_book;
 
     public AdminView(User user) {
         this.brandManager = new BrandManager();
@@ -122,9 +119,9 @@ public class AdminView extends Layout {
         this.loadBookingFilter();
 
         // Renrals Tab Menu
-        this.loadRentalsTable(null);
-        //this.loadRentalsComponent();
-        //this.loadRentalsFilter();
+        this.loadBookTable(null);
+        this.loadBookComponent();
+        this.loadBookFilter();
 
     }
 
@@ -138,6 +135,14 @@ public class AdminView extends Layout {
         });
     }
 
+    public void loadBookFilter() {
+        this.cmb_book_car_plate.removeAllItems();
+        for (Book obj : bookManager.findAll()) {
+            ComboItem item = new ComboItem(obj.getCar().getId(), obj.getCar().getPlate());
+            this.cmb_book_car_plate.addItem(item);
+        }
+        this.cmb_book_car_plate.setSelectedItem(null);
+    }
 
     public void loadBookingFilter() {
         this.cmb_booking_type.setModel(new DefaultComboBoxModel<>(Model.Type.values()));
@@ -166,6 +171,41 @@ public class AdminView extends Layout {
         this.cmb_s_model_brand.setSelectedItem(null);
     }
 
+    public void loadBookComponent() {
+        tableRowSelect(this.tbl_book);
+        this.book_menu = new JPopupMenu();
+        this.book_menu.add("İptal Et").addActionListener(e -> {
+            if (Helper.confirm("sure")) {
+                int selectBookId = this.getTableSelectedRow(this.tbl_book, 0);
+                if (this.bookManager.delete(selectBookId)) {
+                    Helper.showMsg("done");
+                    loadBookTable(null);
+                } else {
+                    Helper.showMsg("error");
+                }
+            }
+        });
+        this.tbl_book.setComponentPopupMenu(book_menu);
+
+        btn_book_search.addActionListener(e -> {
+            ComboItem selectedCar = (ComboItem) cmb_book_car_plate.getSelectedItem();
+            int carId = 0;
+            if (selectedCar != null) {
+                carId = selectedCar.getKey();
+            } else {
+                System.err.println("Selected car is null!");
+                return;
+            }
+            ArrayList<Book> bookListBySearch = this.bookManager.searchForTable(carId);
+            ArrayList<Object[]> bookRowListBySearch = this.bookManager.getForTable(this.col_book.length, bookListBySearch);
+            loadBookTable(bookRowListBySearch);
+        });
+
+        btn_cncl_book.addActionListener(e -> {
+            this.loadBookFilter();
+        });
+    }
+
     public void loadBookingComponent() {
         tableRowSelect(this.tbl_booking);
         this.booking_menu = new JPopupMenu();
@@ -177,6 +217,7 @@ public class AdminView extends Layout {
                 public void windowClosed(WindowEvent e) {
                     loadBookingTable(null);
                     loadBookingFilter();
+                    loadBookTable(null);
                 }
             });
         });
@@ -264,6 +305,8 @@ public class AdminView extends Layout {
                 @Override
                 public void windowClosed(WindowEvent e) {
                     loadModelTable(null);
+                    loadCarTable();
+                    loadBookTable(null);
                 }
             });
         });
@@ -274,6 +317,7 @@ public class AdminView extends Layout {
                 if (this.modelManager.delete(selectModelId)) {
                     Helper.showMsg("done");
                     loadModelTable(null);
+                    loadCarTable();
                 } else {
                     Helper.showMsg("error");
                 }
@@ -334,6 +378,7 @@ public class AdminView extends Layout {
                     loadBrandTable();
                     loadModelTable(null);
                     loadModelFilterBrand();
+                    loadBookTable(null);
                 }
             });
         });
@@ -355,9 +400,12 @@ public class AdminView extends Layout {
         this.tbl_brand.setComponentPopupMenu(brand_menu);
     }
 
-    public void loadRentalsTable(ArrayList<Object[]> rentalsList) {
-        this.col_rentals_list = new Object[]{"ID", "Plaka", "Marka", "Model", "Müşteri", "Telefon", "Mail", "T.C", "Başlangıç Tarihi", "Bitiş Tarihi", "Fiyat"};
-        createTable(this.tmdl_rentals, this.tbl_rentals, this.col_rentals_list, rentalsList);
+    public void loadBookTable(ArrayList<Object[]> bookList) {
+        this.col_book = new Object[]{"ID", "Plaka", "Marka", "Model", "Müşteri", "Telefon", "Mail", "T.C", "Başlangıç Tarihi", "Bitiş Tarihi", "Fiyat"};
+        if (bookList == null) {
+            bookList = this.bookManager.getForTable(this.col_book.length, this.bookManager.findAll());
+        }
+        createTable(this.tmdl_book, this.tbl_book, this.col_book, bookList);
     }
 
     public void loadBookingTable(ArrayList<Object[]> carList) {
