@@ -1,6 +1,5 @@
 #  Rent-a-Car
 
-## Proje Açıklaması
 Bu proje, bir araba kiralama sistemini yönetmek için geliştirilmiş bir Java uygulamasıdır. Müşteriler, mevcut arabaları görüntüleyebilir, kiralama işlemlerini gerçekleştirebilir ve kiralama geçmişlerini takip edebilirler. Proje, PostgreSQL veritabanını kullanarak araba ve müşteri bilgilerini saklar.
 
 ## Özellikler
